@@ -51,6 +51,10 @@ class Queue:
     def tail(self):
         """Return the last element of the queue."""
         return self.queue[-1] if len(self.queue) > 0 else None
+    
+    def work_remained(self):
+        """Return the remained number of tasks in the queue."""
+        return len(self.queue)
 
     def work_available(self):
         """Return whether there are tasks currently in the queue."""
@@ -108,10 +112,6 @@ class Queue:
         :param flag_time: Time that the flag requesting a steal was raised
         :param threshold_time: Time that the flag steal threshold was crossed by the original queue
         """
-        if self.id != self.MAIN_QUEUE_ID:
-            task.front_task_time = self.state.threads[self.get_core()].current_task.time_left \
-                if self.state.threads[self.get_core()].current_task is not None else 0
-
         if set_original:
             task.original_queue = self.id
             task.queued_ahead = self.length() - 1 if self.length() > 0 else 0

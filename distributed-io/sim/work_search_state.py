@@ -5,25 +5,23 @@
 class WorkSearchState:
     """Status of a thread in the work search process."""
 
-    LOCAL_QUEUE_FIRST_CHECK = 0
-    WORK_STEAL_CHECK = 1
-    LOCAL_QUEUE_FINAL_CHECK = 2
+    POLL = 0
+    PROCESS = 1
+    STEAL = 2
+    YIELD = 3
 
     def __init__(self, config, state):
-        self._state = self.LOCAL_QUEUE_FIRST_CHECK
+        self._state = self.POLL
         self.config = config
         self.sim_state = state
         self.search_start_time = None
 
-    def advance(self):
-        """Move to the next state (stays in local queue first check if work stealing is disabled)."""
-        self._state = (self._state + 1) if self._state < self.LOCAL_QUEUE_FINAL_CHECK else self.LOCAL_QUEUE_FINAL_CHECK
-        if not self.config.work_stealing_enabled:
-            self._state = self.LOCAL_QUEUE_FIRST_CHECK
+    def set_state(self, state):
+        self._state = state
 
     def reset(self, clear_start_time=True):
         """Reset state to first local queue check and optionally reset the timer for current search."""
-        self._state = self.LOCAL_QUEUE_FIRST_CHECK
+        self._state = self.POLL
         if clear_start_time:
             self.search_start_time = None
 
@@ -32,15 +30,21 @@ class WorkSearchState:
         if self.search_start_time is None:
             self.search_start_time = self.sim_state.timer.get_time()
 
+    def is_active(self):
+        """Returns true if core is not parked or allocating."""
+        return self._state != self.LOCAL_THEAD_SWITCH
+
     def __eq__(self, other):
         return self._state == other
 
     def __str__(self):
-        if self._state == self.LOCAL_QUEUE_FIRST_CHECK:
-            return "Checking local queue (first check)"
-        elif self._state == self.WORK_STEAL_CHECK:
-            return "Attempting to work steal"
-        elif self._state == self.LOCAL_QUEUE_FINAL_CHECK:
-            return "Checking local queue (last check)"
+        if self._state == self.POLL:
+            return "Replenishing local queue"
+        elif self._state == self.PROCESS:
+            return "Process local queue"
+        elif self._state == self.STEAL:
+            return "Stealing work remotely"
+        elif self._state == self.YIELD:
+            return "Switching thread locally"
         else:
             return "Unknown state"
