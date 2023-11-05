@@ -74,6 +74,7 @@ class Task:
             and preempted is True
             and self.time_left > 0
         ):
+            logging.debug("Task {} got preempted".format(self))
             self.preempt_count += 1
             self.preempted = True
 
@@ -505,7 +506,7 @@ class NetworkTxTask(Task):
     def on_complete(self):
         # 1. Infinite burst size
         # Transmit in batch
-        for i in range(self.batch):
+        while self.thread.core.tx_queue.work_available() is True:
             logging.debug("Remain {} tasks".format(self.thread.core.tx_queue.work_remained()))
             task = self.thread.core.tx_queue.dequeue()
             logging.debug("Task: {} is being transmitted... rx: {}, tx: {}".format(task, self.state.complete_rx, self.state.complete_tx))

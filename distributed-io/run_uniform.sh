@@ -8,13 +8,16 @@ load_stride=0.05
 host=$(hostname -f)
 
 function update_config() {
+    preempt=$1
+    ws=$2
+
     echo " > Update config: preempt = ${preempt}, ws = ${ws}"
-    jq '.preempt_enabled = '${preempt} configs/uniform_config.json > configs/uniform_config_1.json
-    jq '.work_stealing_enabled = '${ws} configs/uniform_config_1.json > configs/uniform_config_2.json
+    jq '.preempt_enabled = '${preempt} configs/uniform_config.json > configs/uniform_${preempt}_${ws}_config_1.json
+    jq '.work_stealing_enabled = '${ws} configs/uniform_${preempt}_${ws}_config_1.json > configs/uniform_${preempt}_${ws}_config_2.json
 }
 
 function spawn_sim() {
-    python3 simulation.py ../configs/uniform_config_tmp.json uniform_${preempt}_${ws}
+    python3 simulation.py ../configs/uniform_${preempt}_${ws}_config_tmp.json uniform_${preempt}_${ws}
     wait
 }
 
@@ -26,11 +29,11 @@ function run_expriments() {
 
     mkdir ${uniform_dir} 
 
-    update_config
+    update_config ${preempt} ${ws}
 
     for i in $(seq 0.05 0.05 1)
     do
-        jq '.avg_system_load = '${i} configs/uniform_config_2.json > configs/uniform_config_tmp.json
+        jq '.avg_system_load = '${i} configs/uniform_${preempt}_${ws}_config_2.json > configs/uniform_${preempt}_${ws}_config_tmp.json
 
         cd sim/
 

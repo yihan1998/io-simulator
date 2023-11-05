@@ -79,7 +79,7 @@ class SimConfig:
             print("There must be nonzero queues and threads")
             return False
 
-        if self.num_cores != len(set(self.hw_queue_mapping)) or self.num_cores != len(set(self.worker_queue_mapping)) :
+        if self.num_hw_queues != len(set(self.hw_queue_mapping)) or self.num_worker_queues != len(set(self.worker_queue_mapping)) :
             print("Number of queues does not match number in thread/queue mapping.")
             return False
         

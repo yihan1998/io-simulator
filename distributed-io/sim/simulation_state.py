@@ -118,8 +118,12 @@ class SimulationState:
         # Initialize threads
         for i in range(config.num_cores):
             hw_queue = self.hw_queues[config.hw_queue_mapping[i]]
-            rx_queue = self.rx_queues[config.worker_queue_mapping[i]]
-            tx_queue = self.tx_queues[config.worker_queue_mapping[i]]
+            if self.config.num_worker_queues > 1:
+                rx_queue = self.rx_queues[config.worker_queue_mapping[i]]
+                tx_queue = self.tx_queues[config.worker_queue_mapping[i]]
+            else:
+                rx_queue = self.rx_queues[0]
+                tx_queue = self.tx_queues[0]
 
             core = Core(i, rx_queue, tx_queue, config, self)
 

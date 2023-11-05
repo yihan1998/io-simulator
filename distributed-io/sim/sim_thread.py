@@ -153,7 +153,8 @@ class WorkerThread(Thread):
         initial_task = self.current_task
         preempt = False
 
-        # print("Process task ", self.current_task.__class__)
+        logging.debug("preempt timer on: {}, start: {}, task {}, remain: {}"
+                      .format(self.core.preempt_timer_on, self.core.preempt_timer_start, self, self.current_task.time_left))
 
         if (self.config.preempt_enabled
             and self.core.preempt_timer_on
@@ -191,6 +192,9 @@ class WorkerThread(Thread):
 
         # Otherwise, account for the time spent
         else:
+            if initial_task.preempted:
+                time_increment -= 1
+
             if not initial_task.is_idle:
                 self.time_busy += time_increment
 
