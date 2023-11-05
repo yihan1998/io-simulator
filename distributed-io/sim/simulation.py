@@ -38,7 +38,10 @@ class Simulation:
         self.state.initialize_state(self.config)
 
         # A short duration may result in no tasks
-        self.state.tasks_scheduled = len(self.state.tasks)
+        # self.state.tasks_scheduled = len(self.state.tasks)
+        for tasks in self.state.tasks:
+            self.state.tasks_scheduled += len(tasks)
+            self.state.task_number.append(0)
         if self.state.tasks_scheduled == 0:
             return
 
@@ -97,8 +100,9 @@ class Simulation:
 
         # Write task information
         task_file.write(','.join(Task.get_stat_headers(self.config)) + "\n")
-        for task in self.state.tasks:
-            task_file.write(','.join(task.get_stats()) + "\n")
+        for tasks in self.state.tasks:
+            for task in tasks:
+                task_file.write(','.join(task.get_stats()) + "\n")
         task_file.close()
 
         # Save the configuration

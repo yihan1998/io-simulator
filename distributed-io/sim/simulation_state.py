@@ -27,10 +27,10 @@ class SimulationState:
         self.hw_queues = []
         self.rx_queues = []
         self.tx_queues = []
+        self.task_number = []
 
         # Global stats
         self.overall_steal_count = 0
-        self.task_number = 0
         self.complete_task_count = 0
         self.complete_rx = 0
         self.complete_tx = 0
@@ -65,7 +65,8 @@ class SimulationState:
     def add_final_stats(self):
         """Add final global stats to to the simulation state."""
         self.end_time = self.timer.get_time()
-        self.tasks_scheduled = len(self.tasks)
+        for tasks in self.tasks:
+            self.tasks_scheduled += len(tasks)
         self.sim_end_time = datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")
     
     def results(self):
@@ -141,25 +142,30 @@ class SimulationState:
 
         # Set tasks and arrival times
         # Evenly distributed workload (TODO: imbalance)
-        request_rate = config.avg_system_load * config.load_thread_count / config.ARRIVAL_RATE
-        next_task_time = int(random.expovariate(request_rate))
-        i = 0
-        while (config.sim_duration is None or next_task_time < config.sim_duration) and \
-                (config.num_tasks is None or i < config.num_tasks):
-            service_time = None
-            while service_time is None or service_time == 0:
-                if config.constant_service_time:
-                    service_time = config.AVERAGE_SERVICE_TIME
-                elif config.bimodal_service_time:
-                    service_time = self.bimodal(config.BIMODAL_SERVICE_TIME_1, config.BIMODAL_PROB_1, config.BIMODAL_SERVICE_TIME_2, config.BIMODAL_PROB_2)
-                elif config.uniform_service_time:
-                    service_time = int(random.uniform(0.5 * config.AVERAGE_SERVICE_TIME, 1.5 * config.AVERAGE_SERVICE_TIME))
-                else:
-                    service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
+        per_core_request_rate = config.avg_system_load / config.ARRIVAL_RATE
+        for thread in range(config.load_thread_count):
+            tasks = []
+            print("\nInitializing tasks for thread {}".format(thread))
+            next_task_time = int(random.expovariate(per_core_request_rate))
+            i = 0
+            while (config.sim_duration is None or next_task_time < config.sim_duration) and \
+                    (config.num_tasks is None or i < config.num_tasks):
+                service_time = None
+                while service_time is None or service_time == 0:
+                    if config.constant_service_time:
+                        service_time = config.AVERAGE_SERVICE_TIME
+                    elif config.bimodal_service_time:
+                        service_time = self.bimodal(config.BIMODAL_SERVICE_TIME_1, config.BIMODAL_PROB_1, config.BIMODAL_SERVICE_TIME_2, config.BIMODAL_PROB_2)
+                    elif config.uniform_service_time:
+                        service_time = int(random.uniform(0.5 * config.AVERAGE_SERVICE_TIME, 1.5 * config.AVERAGE_SERVICE_TIME))
+                    else:
+                        service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
 
-            self.tasks.append(Task(service_time, next_task_time, config, self))
-            next_task_time += int(random.expovariate(request_rate))
+                tasks.append(Task(service_time, next_task_time, config, self))
+                next_task_time += int(random.expovariate(per_core_request_rate))
 
-            if config.progress_bar and i % 100 == 0:
-                progress.print_progress(next_task_time, config.sim_duration, decimals=3, length=50)
-            i += 1
+                if config.progress_bar and i % 100 == 0:
+                    progress.print_progress(next_task_time, config.sim_duration, decimals=3, length=50)
+                i += 1
+
+            self.tasks.append(tasks)

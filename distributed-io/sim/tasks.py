@@ -443,14 +443,14 @@ class NetworkPollTask(Task):
         # Poll HW queue 
         # 1. Infinite burst size
         num_recv = 0
-        while self.state.task_number < len(self.state.tasks) and \
-                self.state.tasks[self.state.task_number].arrival_time <= self.state.timer.get_time():
-            task = self.state.tasks[self.state.task_number]
+        while self.state.task_number[self.thread.id] < len(self.state.tasks[self.thread.id]) and \
+                self.state.tasks[self.thread.id][self.state.task_number[self.thread.id]].arrival_time <= self.state.timer.get_time():
+            task = self.state.tasks[self.thread.id][self.state.task_number[self.thread.id]]
             # Enqueue tasks into network queue to be received
             rx_task = NetworkRxTask(self.thread, task, self.config, self.state)
             self.thread.queue.enqueue(rx_task)
-            logging.debug("[HW RX]: {} onto network receive queue".format(self.state.tasks[self.state.task_number]))
-            self.state.task_number += 1
+            logging.debug("[HW RX]: {} onto network receive queue".format(task))
+            self.state.task_number[self.thread.id] += 1
             num_recv += 1
 
         if num_recv > 0:
