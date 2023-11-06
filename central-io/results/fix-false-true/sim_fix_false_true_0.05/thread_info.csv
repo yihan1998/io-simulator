@@ -1,0 +1,17 @@
+Thread ID,Type,Busy Time,Task Time,Network Time,Preempt Time
+0,<class 'sim_thread.WorkerThread'>,437441,425121,0,0
+1,<class 'sim_thread.WorkerThread'>,261660,245000,0,0
+2,<class 'sim_thread.WorkerThread'>,105160,85000,0,0
+3,<class 'sim_thread.WorkerThread'>,36420,15000,0,0
+4,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+5,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+6,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+7,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+8,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+9,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+10,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+11,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+12,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+13,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+14,<class 'sim_thread.WorkerThread'>,21700,0,0,0
+15,<class 'sim_thread.WorkerThread'>,21700,0,0,0
