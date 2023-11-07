@@ -142,7 +142,11 @@ class SimulationState:
 
         # Set tasks and arrival times
         # Evenly distributed workload (TODO: imbalance)
-        per_core_request_rate = config.avg_system_load / config.ARRIVAL_RATE
+        if config.bursty_arrivals:
+            burst_count = config.BURST_SIZE
+        else:
+            burst_count = 1
+        per_core_request_rate = config.avg_system_load / (config.ARRIVAL_RATE * burst_count)
         for thread in range(config.load_thread_count):
             tasks = []
             print("\nInitializing tasks for thread {}".format(thread))
@@ -150,18 +154,23 @@ class SimulationState:
             i = 0
             while (config.sim_duration is None or next_task_time < config.sim_duration) and \
                     (config.num_tasks is None or i < config.num_tasks):
-                service_time = None
-                while service_time is None or service_time == 0:
-                    if config.constant_service_time:
-                        service_time = config.AVERAGE_SERVICE_TIME
-                    elif config.bimodal_service_time:
-                        service_time = self.bimodal(config.BIMODAL_SERVICE_TIME_1, config.BIMODAL_PROB_1, config.BIMODAL_SERVICE_TIME_2, config.BIMODAL_PROB_2)
-                    elif config.uniform_service_time:
-                        service_time = int(random.uniform(0.5 * config.AVERAGE_SERVICE_TIME, 1.5 * config.AVERAGE_SERVICE_TIME))
-                    else:
-                        service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
+                service_time = None 
+                for j in range(burst_count):
+                    while service_time is None or service_time == 0:
+                        if config.constant_service_time:
+                            service_time = config.AVERAGE_SERVICE_TIME
+                        elif config.bimodal_service_time:
+                            service_time = self.bimodal(config.BIMODAL_SERVICE_TIME_1, config.BIMODAL_PROB_1, config.BIMODAL_SERVICE_TIME_2, config.BIMODAL_PROB_2)
+                        elif config.uniform_service_time:
+                            service_time = int(random.uniform(0.5 * config.AVERAGE_SERVICE_TIME, 1.5 * config.AVERAGE_SERVICE_TIME))
+                        elif config.normal_service_time:
+                            service_time = int(np.random.normal(config.AVERAGE_SERVICE_TIME, 400.0))
+                        elif config.lognormal_service_time:
+                            service_time = int(np.random.lognormal(8.5, 0.25))
+                        else:
+                            service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
 
-                tasks.append(Task(service_time, next_task_time, config, self))
+                    tasks.append(Task(service_time, next_task_time, config, self))
                 next_task_time += int(random.expovariate(per_core_request_rate))
 
                 if config.progress_bar and i % 100 == 0:

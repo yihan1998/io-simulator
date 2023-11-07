@@ -2,20 +2,45 @@
 
 # Define the start, end, and stride values
 load_start=0.05
-load_end=1.20
+load_end=1.0
 load_stride=0.05
 
 host=$(hostname -f)
 
 function update_config() {
+    preempt=$1
+    ws=$2
+    rate=$3
     echo " > Update config: preempt = ${preempt}, ws = ${ws}"
-    jq '.preempt_enabled = '${preempt} configs/fix_config.json > configs/fix_config_1.json
-    jq '.work_stealing_enabled = '${ws} configs/fix_config_1.json > configs/fix_config_2.json
+    jq '.preempt_enabled = '${preempt} configs/fix_config.json > configs/fix_${preempt}_${ws}_${rate}_config_1.json
+    jq '.work_stealing_enabled = '${ws} configs/fix_${preempt}_${ws}_${rate}_config_1.json > configs/fix_${preempt}_${ws}_${rate}_config_2.json
+    jq '.avg_system_load = '${rate} configs/fix_${preempt}_${ws}_${rate}_config_2.json > configs/fix_${preempt}_${ws}_${rate}_config_tmp.json
+
+    rm configs/fix_${preempt}_${ws}_${rate}_*_1.json configs/fix_${preempt}_${ws}_${rate}_*_2.json
 }
 
 function spawn_sim() {
-    python3 simulation.py ../configs/fix_config_tmp.json fix_${preempt}_${ws}
+    preempt=$1
+    ws=$2
+    rate=$3
+    python3 simulation.py ../configs/fix_${preempt}_${ws}_${rate}_config_tmp.json fix_${preempt}_${ws}_${rate}
     wait
+}
+function run_expriment() {
+    preempt=$1
+    ws=$2
+    rate=$3
+    fix_dir=$4
+
+    update_config ${preempt} ${ws} ${rate}
+
+    cd sim/
+
+    spawn_sim ${preempt} ${ws} ${rate}
+
+    cd ../
+
+    mv results/sim_${host}_fix_${preempt}_${ws}_${rate} ${fix_dir}/sim_fix_${preempt}_${ws}_${rate}
 }
 
 function run_expriments() {
@@ -26,20 +51,12 @@ function run_expriments() {
 
     mkdir ${fix_dir} 
 
-    update_config
-
     for i in $(seq 0.05 0.05 1)
     do
-        jq '.avg_system_load = '${i} configs/fix_config_2.json > configs/fix_config_tmp.json
-
-        cd sim/
-
-        spawn_sim
-
-        cd ../
-
-        mv results/sim_${host}_fix_${preempt}_${ws} ${fix_dir}/sim_fix_${preempt}_${ws}_${i}
+        run_expriment ${preempt} ${ws} ${i} ${fix_dir} &
     done
+
+    wait
 }
 
 # No preemption, No workstealing
@@ -56,4 +73,4 @@ run_expriments true true &
 
 wait
 
-rm configs/*_tmp.json configs/*_1.json configs/*_2.json
+rm configs/fix_*_tmp.json configs/fix_*_1.json configs/fix_*_2.json

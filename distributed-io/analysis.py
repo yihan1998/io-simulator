@@ -144,7 +144,6 @@ def main():
         path = "./results/" + name + '/'
         sim_list = os.listdir(path)
         for sim_name in sim_list:
-            print(sim_name)
             analyze_sim_run(name, path + sim_name, output_file, time_dropped=int(sys.argv[-1])/100)
         print("Simulation analysis complete")
 

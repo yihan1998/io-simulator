@@ -18,7 +18,10 @@ class SimConfig:
         sim_duration=None,
         locking_enabled=True,
         pb_enabled=True,
+        bursty_arrivals=False,
         bimodal_service_time=False,
+        normal_service_time=False,
+        lognormal_service_time=False,
         constant_service_time=True,
         uniform_service_time=False,
         preempt_enabled=False,
@@ -40,10 +43,15 @@ class SimConfig:
         # Additional parameters
         self.locking_enabled = locking_enabled
         self.progress_bar = pb_enabled
+        self.bursty_arrivals = bursty_arrivals
         self.bimodal_service_time = bimodal_service_time
+        self.normal_service_time = normal_service_time
+        self.lognormal_service_time = lognormal_service_time
         self.constant_service_time = constant_service_time
         self.uniform_service_time = uniform_service_time
         self.preempt_enabled = preempt_enabled
+
+        self.BURST_SIZE = 16
 
         self.ARRIVAL_RATE = 1000
         self.AVERAGE_SERVICE_TIME = 1000
