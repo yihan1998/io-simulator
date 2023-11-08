@@ -226,10 +226,7 @@ class AbstractWorkStealTask(Task):
         queue_length = self.remote.length()
 
         if queue_length > 0:
-            task = self.remote.peak
-            if type(task) == Task:
-                self.thread.core.rx_queue.enqueue(self.remote.dequeue(), stolen=True)
-                logging.debug("Steal {} to core {}".format(task, self.thread.core))
+            self.thread.core.rx_queue.enqueue(self.remote.dequeue(), stolen=True)
         # stolen_tasks = []
         # # Avoid inverting the order of stolen tasks (stolen enqueues go to front of queue)
         # for i in range(math.ceil(queue_length / 2)):
