@@ -166,7 +166,8 @@ class SimulationState:
                         elif config.normal_service_time:
                             service_time = int(np.random.normal(config.AVERAGE_SERVICE_TIME, 400.0))
                         elif config.lognormal_service_time:
-                            service_time = int(np.random.lognormal(8.5, 0.25))
+                            # service_time = int(np.random.lognormal(8.5, 0.25))
+                            service_time = int(np.random.lognormal(7.7, .5))
                         else:
                             service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
 

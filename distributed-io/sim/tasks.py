@@ -226,8 +226,10 @@ class AbstractWorkStealTask(Task):
         queue_length = self.remote.length()
 
         if queue_length > 0:
-            self.thread.core.rx_queue.enqueue(self.remote.dequeue(), stolen=True)
-
+            task = self.remote.peak
+            if type(task) == Task:
+                self.thread.core.rx_queue.enqueue(self.remote.dequeue(), stolen=True)
+                logging.debug("Steal {} to core {}".format(task, self.thread.core))
         # stolen_tasks = []
         # # Avoid inverting the order of stolen tasks (stolen enqueues go to front of queue)
         # for i in range(math.ceil(queue_length / 2)):
@@ -332,11 +334,13 @@ class WorkStealTask(AbstractWorkStealTask):
         # If work was found, look at own queue
         if self.work_found:
             self.work_steal()
+            logging.debug("Setting state to PROCESS")
             self.thread.work_search_state.set_state(WorkSearchState.PROCESS)
             self.thread.successful_ws_time += self.service_time
 
         # If no work found and completed minimum search time, proceed to next step
         else:
+            logging.debug("Setting state to POLL")
             self.thread.work_search_state.set_state(WorkSearchState.POLL)
             self.thread.unsuccessful_ws_time += self.service_time
 
@@ -411,10 +415,12 @@ class WorkStealTask(AbstractWorkStealTask):
 
     def start_work_steal_check(self, remote):
         """Add to service time the amount required to check another queue and set it as the remote candidate."""
+        logging.debug("Start work steal check...")
         self.add_time(self.config.WORK_STEAL_CHECK_TIME)
         self.candidate_remote = remote
 
     def start_work_steal(self):
+        logging.debug("Start work steal...")
         """Add to service time the amount required to work steal."""
         self.add_time(self.config.WORK_STEAL_TIME)
 

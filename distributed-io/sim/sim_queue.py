@@ -137,6 +137,13 @@ class Queue:
             task = self.queue.pop(0)
             return task
         return self.queue.pop(0)
+    
+    def peak(self):
+        """Remove and return turn task from the front of the queue."""
+        if self.id != -1 and len(self.queue) <= self.config.QUEUE_BOUND:
+            task = self.queue[0]
+            return task
+        return None
 
     def length(self, count_current=False):
         """Return the length of the queue."""

@@ -51,7 +51,7 @@ class SimConfig:
         self.uniform_service_time = uniform_service_time
         self.preempt_enabled = preempt_enabled
 
-        self.BURST_SIZE = 16
+        self.BURST_SIZE = 1
 
         self.ARRIVAL_RATE = 1000
         self.AVERAGE_SERVICE_TIME = 1000
