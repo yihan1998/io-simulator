@@ -166,8 +166,28 @@ class SimulationState:
                         elif config.normal_service_time:
                             service_time = int(np.random.normal(config.AVERAGE_SERVICE_TIME, 400.0))
                         elif config.lognormal_service_time:
-                            # service_time = int(np.random.lognormal(8.5, 0.25))
-                            service_time = int(np.random.lognormal(7.7, .5))
+                            service_time = int(np.random.lognormal(8.5, 0.25))
+
+                            # Average      Min      10%      25%   Median      90%      95%      99%    99.9%
+                            # 2273.54  1044.54 1626.42  1867.05  2220.56  2995.02  3280.11  3872.30  5160.41
+                            # service_time = int(np.random.lognormal(7.7, .25))
+
+                            #  Average      Min      10%      25%   Median      90%      95%      99%    99.9%
+                            #  2457.26   426.45 1158.31  1577.90  2186.60  4062.19  4750.93  6435.49  8255.61
+                            # service_time = int(np.random.lognormal(7.7, .5))  # Average = 2400, Median = 2200
+
+                            #  Average      Min      10%      25%   Median      90%      95%      99%    99.9%
+                            #  2874.89   111.54  865.40  1279.37  2156.83  5704.89  7389.80 11283.05 19341.30
+                            # service_time = int(np.random.lognormal(7.7, .75)) # Average = 2800, Median = 2200
+
+                            #  Average      Min      10%      25%   Median      90%      95%      99%    99.9%
+                            #  3489.04   130.86  629.12  1108.62  2164.36  7282.77 10991.90 22897.30 31547.86
+                            # service_time = int(np.random.lognormal(7.7, 1.))  # Average = 3400, Median = 2200
+
+                            #  Average      Min      10%      25%   Median      90%      95%      99%    99.9%
+                            #  4588.32    34.69  455.26   940.81  2232.04 10706.59 16397.18 36637.58 84518.84
+                            # service_time = int(np.random.lognormal(7.7, 1.25))    # Average = 4500, Median = 2100
+                            # service_time = int(np.random.lognormal(7.7, 1.5)) # Average = 5400, Median = 2000
                         else:
                             service_time = int(random.expovariate(1 / config.AVERAGE_SERVICE_TIME))
 
